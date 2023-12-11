@@ -18,3 +18,34 @@ paths:
               schema:
                 type: string
                 example: pong
+  '/tilingJob':
+    post:
+      description: creates a zone tiling job
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ZoneTilingJob"
+      responses:
+        200:
+          description: the created zone tiling job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ZoneTilingJob"
+components:
+  schemas:
+    Geometry:
+      type: object
+      properties:
+        id:
+          type: string
+    ZoneTilingJob:
+      type: object
+      properties:
+        id:
+          type: string
+        geometries:
+          type: array
+          items:
+            $ref: "#/components/schemas/ZoneTilingJob"
