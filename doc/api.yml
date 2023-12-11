@@ -1,0 +1,21 @@
+openapi: 3.0.3
+info:
+  title: geo-tiler
+  description: geo-tiler
+  version: 'latest'
+servers:
+  - url: 'https://localhost:8080'
+paths:
+  '/ping':
+    get:
+      operationId: ping
+      tags:
+        - Health
+      responses:
+        200:
+          description: pong
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: pong
