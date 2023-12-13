@@ -3,6 +3,7 @@ package school.hei.geotiler.repository.model;
 import static java.util.Comparator.comparing;
 import static school.hei.geotiler.repository.model.types.PostgresTypes.JSONB;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import java.io.Serializable;
 import java.time.Instant;
@@ -30,6 +31,7 @@ import org.hibernate.annotations.TypeDef;
 @Getter
 @Setter
 @ToString
+@JsonIgnoreProperties({"status"})
 public class ZoneTilingTask extends ProgressiveAction<TaskStatus> implements Serializable {
   @Id private String id;
 

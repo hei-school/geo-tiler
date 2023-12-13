@@ -4,6 +4,7 @@ import static java.util.Comparator.comparing;
 import static school.hei.geotiler.repository.model.Status.HealthStatus.SUCCEEDED;
 import static school.hei.geotiler.repository.model.Status.ProgressionStatus.FINISHED;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ import org.hibernate.annotations.FetchMode;
 @Getter
 @NoArgsConstructor
 @ToString
+@JsonIgnoreProperties({"status", "done"})
 public class ZoneTilingJob extends ProgressiveAction<JobStatus> {
   @Id private String id;
   private String zoneName;
