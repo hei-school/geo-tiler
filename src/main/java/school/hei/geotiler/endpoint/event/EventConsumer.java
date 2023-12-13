@@ -20,7 +20,7 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 @Component
 @Slf4j
 public class EventConsumer implements Consumer<List<EventConsumer.AcknowledgeableTypedEvent>> {
-  private static final ObjectMapper om = new ObjectMapper();
+  private static final ObjectMapper om = new ObjectMapper().findAndRegisterModules();
   private static final String DETAIL_PROPERTY = "detail";
   private static final String DETAIL_TYPE_PROPERTY = "detail-type";
   private final EventServiceInvoker eventServiceInvoker;
