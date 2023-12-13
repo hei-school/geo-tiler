@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import school.hei.geotiler.conf.FacadeIT;
+import school.hei.geotiler.endpoint.event.EventProducer;
 import school.hei.geotiler.endpoint.rest.model.CreateZoneTilingJob;
 import school.hei.geotiler.endpoint.rest.model.Geometry;
 import school.hei.geotiler.endpoint.rest.model.ZoneTilingJob;
@@ -16,6 +18,7 @@ import school.hei.geotiler.model.PageFromOne;
 class ZoneTilingJobControllerIT extends FacadeIT {
 
   @Autowired ZoneTilingController controller;
+  @MockBean EventProducer eventProducer;
 
   @Test
   void create_tiling_job_ok() {

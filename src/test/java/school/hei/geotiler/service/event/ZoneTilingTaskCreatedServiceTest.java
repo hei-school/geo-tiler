@@ -15,12 +15,17 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import school.hei.geotiler.conf.FacadeIT;
+import school.hei.geotiler.endpoint.event.EventProducer;
 import school.hei.geotiler.endpoint.event.gen.ZoneTilingTaskCreated;
 import school.hei.geotiler.file.BucketComponent;
 import school.hei.geotiler.file.ExtensionGuesser;
 import school.hei.geotiler.file.FileHash;
 import school.hei.geotiler.file.FileHashAlgorithm;
+import school.hei.geotiler.repository.ZoneTilingJobRepository;
+import school.hei.geotiler.repository.ZoneTilingTaskRepository;
+import school.hei.geotiler.repository.model.JobStatus;
 import school.hei.geotiler.repository.model.TaskStatus;
+import school.hei.geotiler.repository.model.ZoneTilingJob;
 import school.hei.geotiler.repository.model.ZoneTilingTask;
 import school.hei.geotiler.service.api.TilesDownloaderApi;
 
@@ -29,6 +34,9 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
   @MockBean BucketComponent bucketComponent;
   @MockBean TilesDownloaderApi api;
   @MockBean ExtensionGuesser extensionGuesser;
+  @Autowired ZoneTilingTaskRepository repository;
+  @Autowired ZoneTilingJobRepository zoneTilingJobRepository;
+  @MockBean EventProducer eventProducer;
 
   @BeforeEach
   void setUp() {
@@ -47,25 +55,42 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
 
   @Test
   void unzip_and_upload_ok() {
+    String jobId = randomUUID().toString();
+    ZoneTilingJob job =
+        zoneTilingJobRepository.save(
+            ZoneTilingJob.builder()
+                .id(jobId)
+                .statusHistory(
+                    (List.of(
+                        JobStatus.builder()
+                            .id(randomUUID().toString())
+                            .jobId(jobId)
+                            .progression(PENDING)
+                            .health(UNKNOWN)
+                            .build())))
+                .zoneName("mock")
+                .emailReceiver("mock@hotmail.com")
+                .build());
     String taskId = randomUUID().toString();
-    ZoneTilingTaskCreated created =
-        ZoneTilingTaskCreated.builder()
-            .task(
-                ZoneTilingTask.builder()
-                    .id(taskId)
-                    .geometry(ZoneTilingTask.Geometry.builder().id(randomUUID().toString()).build())
-                    .statusHistory(
-                        List.of(
-                            TaskStatus.builder()
-                                .id(randomUUID().toString())
-                                .taskId(taskId)
-                                .progression(PENDING)
-                                .health(UNKNOWN)
-                                .build()))
-                    .build())
+    ZoneTilingTask toCreate =
+        ZoneTilingTask.builder()
+            .id(taskId)
+            .jobId(job.getId())
+            .geometry(ZoneTilingTask.Geometry.builder().id(randomUUID().toString()).build())
+            .statusHistory(
+                List.of(
+                    TaskStatus.builder()
+                        .id(randomUUID().toString())
+                        .taskId(taskId)
+                        .progression(PENDING)
+                        .health(UNKNOWN)
+                        .build()))
             .build();
+    ZoneTilingTask created = repository.save(toCreate);
+    ZoneTilingTaskCreated createdEventPayload =
+        ZoneTilingTaskCreated.builder().task(created).build();
 
-    subject.accept(created);
+    subject.accept(createdEventPayload);
 
     int numberOfZipFiles = 1;
     int numberOfNotDirectoryFilesInZip = 2;
