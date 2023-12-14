@@ -136,7 +136,7 @@ components:
     PageSize:
       type: integer
       description: Cannot exceed `500`
-    Geometry:
+    Feature:
       type: object
       properties:
         id:
@@ -148,10 +148,10 @@ components:
           type: string
         zoneName:
           type: string
-        geometries:
+        features:
           type: array
           items:
-            $ref: "#/components/schemas/Geometry"
+            $ref: "#/components/schemas/Feature"
     ZoneTilingJob:
       allOf:
         - $ref: "#/components/schemas/CreateZoneTilingJob"

@@ -6,7 +6,7 @@ import school.hei.geotiler.repository.model.ZoneTilingTask;
 
 @Component
 public class TilesDownloaderApi {
-  public byte[] downloadTiles(ZoneTilingTask.Geometry geometry) {
-    throw new NotImplementedException("Tile download from geometry is not yet implemented");
+  public byte[] downloadTiles(ZoneTilingTask.Feature feature) {
+    throw new NotImplementedException("Tile download from feature is not yet implemented");
   }
 }

@@ -76,7 +76,7 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
         ZoneTilingTask.builder()
             .id(taskId)
             .jobId(job.getId())
-            .geometry(ZoneTilingTask.Geometry.builder().id(randomUUID().toString()).build())
+            .feature(ZoneTilingTask.Feature.builder().id(randomUUID().toString()).build())
             .statusHistory(
                 List.of(
                     TaskStatus.builder()

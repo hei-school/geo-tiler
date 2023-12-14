@@ -8,16 +8,16 @@ import static school.hei.geotiler.repository.model.Status.ProgressionStatus.PEND
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
-import school.hei.geotiler.endpoint.rest.model.Geometry;
+import school.hei.geotiler.endpoint.rest.model.Feature;
 import school.hei.geotiler.repository.model.TaskStatus;
 import school.hei.geotiler.repository.model.ZoneTilingTask;
 
 @Component
 @AllArgsConstructor
 public class ZoneTilingTaskMapper {
-  private final GeometryMapper geometryMapper;
+  private final FeatureMapper featureMapper;
 
-  public ZoneTilingTask fromGeometryAndJob(Geometry geometry, String jobId) {
+  public ZoneTilingTask from(Feature feature, String jobId) {
     String generatedId = randomUUID().toString();
     return ZoneTilingTask.builder()
         .id(generatedId)
@@ -31,7 +31,7 @@ public class ZoneTilingTaskMapper {
                     .taskId(generatedId)
                     .build()))
         .submissionInstant(now())
-        .geometry(geometryMapper.toDomain(geometry))
+        .feature(featureMapper.toDomain(feature))
         .build();
   }
 }

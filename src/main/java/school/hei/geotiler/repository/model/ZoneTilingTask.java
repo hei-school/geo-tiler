@@ -43,7 +43,7 @@ public class ZoneTilingTask extends ProgressiveAction<TaskStatus> implements Ser
 
   @Type(type = JSONB)
   @Column(columnDefinition = JSONB)
-  private Geometry geometry;
+  private Feature feature;
 
   @Override
   protected List<TaskStatus> checkStatusHistory(List<TaskStatus> statusHistory) {
@@ -81,12 +81,12 @@ public class ZoneTilingTask extends ProgressiveAction<TaskStatus> implements Ser
       String jobId,
       Instant submissionInstant,
       List<TaskStatus> statusHistory,
-      Geometry geometry) {
+      Feature feature) {
     this.id = id;
     this.jobId = jobId;
     this.submissionInstant = submissionInstant;
     this.statusHistory = new ArrayList<>(checkStatusHistory(statusHistory));
-    this.geometry = geometry;
+    this.feature = feature;
   }
 
   @Builder
@@ -95,7 +95,7 @@ public class ZoneTilingTask extends ProgressiveAction<TaskStatus> implements Ser
   @AllArgsConstructor
   @Getter
   @Setter
-  public static class Geometry implements Serializable {
+  public static class Feature implements Serializable {
     private String id;
   }
 

@@ -45,8 +45,8 @@ class ZoneTilingJobCreatedServiceTest extends FacadeIT {
                         .id(taskId)
                         .jobId(jobId)
                         .submissionInstant(now())
-                        .geometry(
-                            ZoneTilingTask.Geometry.builder().id(randomUUID().toString()).build())
+                        .feature(
+                            ZoneTilingTask.Feature.builder().id(randomUUID().toString()).build())
                         .statusHistory(
                             List.of(
                                 TaskStatus.builder()
@@ -73,8 +73,8 @@ class ZoneTilingJobCreatedServiceTest extends FacadeIT {
     subject.accept(createdEventPayload);
     ZoneTilingJob actualAfterAccept = zoneTilingJobService.findById(created.getId());
 
-    int numberOfGeometriesInJob = 1;
-    verify(eventProducer, times(numberOfGeometriesInJob)).accept(anyList());
+    int numberOfFeaturesInJob = 1;
+    verify(eventProducer, times(numberOfFeaturesInJob)).accept(anyList());
     assertEquals(actualAfterAccept.getStatus().getHealth(), UNKNOWN);
     assertEquals(actualAfterAccept.getStatus().getProgression(), PROCESSING);
   }

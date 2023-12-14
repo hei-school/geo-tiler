@@ -45,7 +45,7 @@ public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCrea
             .taskId(task.getId())
             .build());
     File downloadedTiles =
-        fileWriter.apply(api.downloadTiles(zoneTilingTaskCreated.getTask().getGeometry()), null);
+        fileWriter.apply(api.downloadTiles(zoneTilingTaskCreated.getTask().getFeature()), null);
     try {
       ZipFile asZipFile = new ZipFile(downloadedTiles);
       Path unzippedPath = fileUnzipper.apply(asZipFile);

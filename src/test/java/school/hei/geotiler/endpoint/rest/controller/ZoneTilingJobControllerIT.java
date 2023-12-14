@@ -10,7 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import school.hei.geotiler.conf.FacadeIT;
 import school.hei.geotiler.endpoint.event.EventProducer;
 import school.hei.geotiler.endpoint.rest.model.CreateZoneTilingJob;
-import school.hei.geotiler.endpoint.rest.model.Geometry;
+import school.hei.geotiler.endpoint.rest.model.Feature;
 import school.hei.geotiler.endpoint.rest.model.ZoneTilingJob;
 import school.hei.geotiler.model.BoundedPageSize;
 import school.hei.geotiler.model.PageFromOne;
@@ -26,7 +26,7 @@ class ZoneTilingJobControllerIT extends FacadeIT {
         new CreateZoneTilingJob()
             .emailReceiver("mock@hotmail.com")
             .zoneName("Lyon")
-            .geometries(List.of(new Geometry().id("geom_1_id")));
+            .features(List.of(new Feature().id("feature_1_id")));
 
     var actual = controller.tileZone(creatableJob);
     var actualList = controller.findAll(new PageFromOne(1), new BoundedPageSize(30));
@@ -45,6 +45,6 @@ class ZoneTilingJobControllerIT extends FacadeIT {
         .id(null)
         .zoneName(createZoneTilingJob.getZoneName())
         .emailReceiver(createZoneTilingJob.getEmailReceiver())
-        .geometries(createZoneTilingJob.getGeometries());
+        .features(createZoneTilingJob.getFeatures());
   }
 }

@@ -16,7 +16,7 @@ import school.hei.geotiler.repository.model.JobStatus;
 @AllArgsConstructor
 public class ZoneTilingJobMapper {
   private final ZoneTilingTaskMapper taskMapper;
-  private final GeometryMapper geometryMapper;
+  private final FeatureMapper featureMapper;
 
   public school.hei.geotiler.repository.model.ZoneTilingJob toDomain(CreateZoneTilingJob rest) {
     String generatedId = randomUUID().toString();
@@ -33,8 +33,8 @@ public class ZoneTilingJobMapper {
         .zoneName(rest.getZoneName())
         .emailReceiver(rest.getEmailReceiver())
         .tasks(
-            rest.getGeometries().stream()
-                .map(geometry -> taskMapper.fromGeometryAndJob(geometry, generatedId))
+            rest.getFeatures().stream()
+                .map(feature -> taskMapper.from(feature, generatedId))
                 .toList())
         .submissionInstant(now())
         .build();
@@ -45,6 +45,6 @@ public class ZoneTilingJobMapper {
         .id(domain.getId())
         .zoneName(domain.getZoneName())
         .emailReceiver(domain.getEmailReceiver())
-        .geometries(domain.getTasks().stream().map(geometryMapper::fromZoneTilingTask).toList());
+        .features(domain.getTasks().stream().map(featureMapper::fromZoneTilingTask).toList());
   }
 }
