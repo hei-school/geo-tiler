@@ -25,6 +25,8 @@ Globals:
         AWS_SQS_QUEUE_URL: !Sub '{{resolve:ssm:/geo-tiler/${Env}/sqs/mailbox-queue-url}}'
         AWS_EVENTBRIDGE_BUS: !Sub '{{resolve:ssm:/geo-tiler/${Env}/eventbridge/bus-name}}'
         AWS_S3_BUCKET: !Sub '{{resolve:ssm:/geo-tiler/${Env}/s3/bucket-name}}'
+        AWS_SES_SOURCE: noreply@nowhere.com
+        
         DATABASE_URL: !Sub '{{resolve:ssm:/geo-tiler/${Env}/db/url}}'
         DATABASE_USERNAME: !Sub '{{resolve:ssm:/geo-tiler/${Env}/db/username}}'
         DATABASE_PASSWORD: !Sub '{{resolve:ssm:/geo-tiler/${Env}/db/password}}'
@@ -41,6 +43,7 @@ Resources:
       Handler: school.hei.geotiler.ApiEventHandler::handleRequest
       MemorySize: 512
       Role: !Sub '{{resolve:ssm:/geo-tiler/${Env}/execution/role-arn}}'
+      
       Events:
         ApiCall:
           Type: Api
@@ -54,6 +57,7 @@ Resources:
       Handler: school.hei.geotiler.MailboxEventHandler::handleRequest
       MemorySize: 1024
       Role: !Sub '{{resolve:ssm:/geo-tiler/${Env}/execution/role-arn}}'
+      
       Events:
         AllEvents:
           Type: SQS

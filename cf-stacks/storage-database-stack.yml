@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: geo-tiler - Storage
+Description: geo-tiler - Storage Postgres
 
 Parameters:
   Env:
