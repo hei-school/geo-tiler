@@ -1,6 +1,9 @@
 package school.hei.geotiler.endpoint.rest.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.only;
+import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -12,6 +15,7 @@ import school.hei.geotiler.conf.FacadeIT;
 import school.hei.geotiler.endpoint.event.EventProducer;
 import school.hei.geotiler.endpoint.rest.model.CreateZoneTilingJob;
 import school.hei.geotiler.endpoint.rest.model.Feature;
+import school.hei.geotiler.endpoint.rest.model.GeoServerParameter;
 import school.hei.geotiler.endpoint.rest.model.ZoneTilingJob;
 import school.hei.geotiler.model.BoundedPageSize;
 import school.hei.geotiler.model.PageFromOne;
@@ -28,6 +32,23 @@ class ZoneTilingJobControllerIT extends FacadeIT {
         new CreateZoneTilingJob()
             .emailReceiver("mock@hotmail.com")
             .zoneName("Lyon")
+            .geoServerUrl("https://data.grandlyon.com/fr/geoserv/grandlyon/ows")
+            .geoServerParameter(
+                om.readValue(
+                    """
+                {
+                    "service": "WMS",
+                    "request": "GetMap",
+                    "layers": "grandlyon:ortho_2018",
+                    "styles": "",
+                    "format": "image/png",
+                    "transparent": true,
+                    "version": "1.3.0",
+                    "width": 256,
+                    "height": 256,
+                    "srs": "EPSG:3857"
+                  }""",
+                    GeoServerParameter.class))
             .features(
                 List.of(
                     om.readValue(
@@ -56,22 +77,26 @@ class ZoneTilingJobControllerIT extends FacadeIT {
     var actual = controller.tileZone(creatableJob);
     var actualList = controller.findAll(new PageFromOne(1), new BoundedPageSize(30));
 
-    ZoneTilingJob expected = fromCreateZoneTilingJob(creatableJob);
+    ZoneTilingJob expected = from(creatableJob);
     assertEquals(expected, ignoreId(actual));
     // TODO: coordinates are fine when retrieved by controller::tileZone
     //   but rounded when retrieved by controller::findAll!
     // assertTrue(actualList.stream().map(this::ignoreId).anyMatch(z -> z.equals(expected)));
+
+    verify(eventProducer, only()).accept(any());
   }
 
   private ZoneTilingJob ignoreId(ZoneTilingJob zoneTilingJob) {
     return zoneTilingJob.id(null);
   }
 
-  private ZoneTilingJob fromCreateZoneTilingJob(CreateZoneTilingJob createZoneTilingJob) {
+  private ZoneTilingJob from(CreateZoneTilingJob createZoneTilingJob) {
     return new ZoneTilingJob()
         .id(null)
         .zoneName(createZoneTilingJob.getZoneName())
         .emailReceiver(createZoneTilingJob.getEmailReceiver())
+        .geoServerUrl(createZoneTilingJob.getGeoServerUrl())
+        .geoServerParameter(createZoneTilingJob.getGeoServerParameter())
         .features(createZoneTilingJob.getFeatures());
   }
 }

@@ -143,6 +143,10 @@ components:
           type: string
         zoneName:
           type: string
+        geoServerUrl:
+          type: string
+        geoServerParameter:
+          $ref: "#/components/schemas/GeoServerParameter"
         features:
           type: array
           items:
@@ -158,6 +162,30 @@ components:
     ###########################################################################################################
     ###  GeoJSON objects. Modified from: https://gist.github.com/bubbobne/fe5f2db65acf039be6a9fd92fc9c7233  ###
     ###########################################################################################################
+
+    GeoServerParameter:
+      type: object
+      properties:
+        service:
+          type: string
+        request:
+          type: string
+        layers:
+          type: string
+        styles:
+          type: string
+        format:
+          type: string
+        transparent:
+          type: boolean
+        version:
+          type: string
+        width:
+          type: integer
+        height:
+          type: integer
+        srs:
+          type: string
 
     Feature:
       type: object
