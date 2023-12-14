@@ -4,5 +4,6 @@ import school.hei.geotiler.PojaGenerated;
 
 @PojaGenerated
 public enum FileHashAlgorithm {
-  SHA256
+  SHA256,
+  NONE
 }
