@@ -27,6 +27,7 @@ import school.hei.geotiler.repository.model.JobStatus;
 import school.hei.geotiler.repository.model.TaskStatus;
 import school.hei.geotiler.repository.model.ZoneTilingJob;
 import school.hei.geotiler.repository.model.ZoneTilingTask;
+import school.hei.geotiler.repository.model.geo.Parcel;
 import school.hei.geotiler.service.api.TilesDownloaderApi;
 
 class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
@@ -76,7 +77,7 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
         ZoneTilingTask.builder()
             .id(taskId)
             .jobId(job.getId())
-            .feature(ZoneTilingTask.Feature.builder().id(randomUUID().toString()).build())
+            .parcel(Parcel.builder().id(randomUUID().toString()).build())
             .statusHistory(
                 List.of(
                     TaskStatus.builder()
@@ -98,4 +99,3 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
     verify(bucketComponent, times(numberOfNotDirectoryFilesInZip)).upload(any(), any(String.class));
   }
 }
-;

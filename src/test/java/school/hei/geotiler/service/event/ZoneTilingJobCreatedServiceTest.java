@@ -22,6 +22,7 @@ import school.hei.geotiler.repository.model.JobStatus;
 import school.hei.geotiler.repository.model.TaskStatus;
 import school.hei.geotiler.repository.model.ZoneTilingJob;
 import school.hei.geotiler.repository.model.ZoneTilingTask;
+import school.hei.geotiler.repository.model.geo.Parcel;
 import school.hei.geotiler.service.ZoneTilingJobService;
 
 class ZoneTilingJobCreatedServiceTest extends FacadeIT {
@@ -45,8 +46,7 @@ class ZoneTilingJobCreatedServiceTest extends FacadeIT {
                         .id(taskId)
                         .jobId(jobId)
                         .submissionInstant(now())
-                        .feature(
-                            ZoneTilingTask.Feature.builder().id(randomUUID().toString()).build())
+                        .parcel(Parcel.builder().id(randomUUID().toString()).build())
                         .statusHistory(
                             List.of(
                                 TaskStatus.builder()

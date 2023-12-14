@@ -15,7 +15,6 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,6 +23,7 @@ import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import school.hei.geotiler.repository.model.geo.Parcel;
 
 @TypeDef(name = JSONB, typeClass = JsonBinaryType.class)
 @Entity
@@ -43,7 +43,7 @@ public class ZoneTilingTask extends ProgressiveAction<TaskStatus> implements Ser
 
   @Type(type = JSONB)
   @Column(columnDefinition = JSONB)
-  private Feature feature;
+  private Parcel parcel;
 
   @Override
   protected List<TaskStatus> checkStatusHistory(List<TaskStatus> statusHistory) {
@@ -81,22 +81,12 @@ public class ZoneTilingTask extends ProgressiveAction<TaskStatus> implements Ser
       String jobId,
       Instant submissionInstant,
       List<TaskStatus> statusHistory,
-      Feature feature) {
+      Parcel parcel) {
     this.id = id;
     this.jobId = jobId;
     this.submissionInstant = submissionInstant;
     this.statusHistory = new ArrayList<>(checkStatusHistory(statusHistory));
-    this.feature = feature;
-  }
-
-  @Builder
-  @ToString
-  @NoArgsConstructor
-  @AllArgsConstructor
-  @Getter
-  @Setter
-  public static class Feature implements Serializable {
-    private String id;
+    this.parcel = parcel;
   }
 
   public List<TaskStatus> getStatusHistory() {

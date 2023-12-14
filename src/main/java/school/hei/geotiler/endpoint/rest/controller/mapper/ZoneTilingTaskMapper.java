@@ -17,7 +17,7 @@ import school.hei.geotiler.repository.model.ZoneTilingTask;
 public class ZoneTilingTaskMapper {
   private final FeatureMapper featureMapper;
 
-  public ZoneTilingTask from(Feature feature, String jobId) {
+  public ZoneTilingTask from(Feature createFeature, String jobId) {
     String generatedId = randomUUID().toString();
     return ZoneTilingTask.builder()
         .id(generatedId)
@@ -31,7 +31,7 @@ public class ZoneTilingTaskMapper {
                     .taskId(generatedId)
                     .build()))
         .submissionInstant(now())
-        .feature(featureMapper.toDomain(feature))
+        .parcel(featureMapper.toDomain(createFeature))
         .build();
   }
 }

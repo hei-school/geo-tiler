@@ -136,11 +136,6 @@ components:
     PageSize:
       type: integer
       description: Cannot exceed `500`
-    Feature:
-      type: object
-      properties:
-        id:
-          type: string
     CreateZoneTilingJob:
       type: object
       properties:
@@ -158,3 +153,70 @@ components:
       properties:
         id:
           type: string
+
+
+    ###########################################################################################################
+    ###  GeoJSON objects. Modified from: https://gist.github.com/bubbobne/fe5f2db65acf039be6a9fd92fc9c7233  ###
+    ###########################################################################################################
+
+    Feature:
+      type: object
+      properties:
+        id:
+          type: string
+        geometry:
+          $ref: "#/components/schemas/MultiPolygon"
+
+    Geometry:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum:
+            - Point
+            - LineString
+            - Polygon
+            - MultiPolygon
+
+    Point2D:
+      type: array
+      maxItems: 2
+      minItems: 2
+      items:
+        type: number
+
+    Point:
+      type: object
+      allOf:
+        - $ref: "#/definitions/Geometry"
+      properties:
+        coordinates:
+          $ref: '#/definitions/Point2D'
+
+    Polygon:
+      type: object
+      allOf:
+        - $ref: "#/definitions/Geometry"
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: '#/definitions/Point2D'
+
+    MultiPolygon:
+      type: object
+      allOf:
+        - $ref: "#/definitions/Geometry"
+      properties:
+        coordinates:
+          type: array
+          items:
+            type: array
+            items:
+              type: array
+              items:
+                $ref: '#/definitions/Point2D'

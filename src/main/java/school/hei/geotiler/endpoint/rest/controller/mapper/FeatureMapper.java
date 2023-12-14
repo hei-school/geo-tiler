@@ -3,14 +3,15 @@ package school.hei.geotiler.endpoint.rest.controller.mapper;
 import org.springframework.stereotype.Component;
 import school.hei.geotiler.endpoint.rest.model.Feature;
 import school.hei.geotiler.repository.model.ZoneTilingTask;
+import school.hei.geotiler.repository.model.geo.Parcel;
 
 @Component
 public class FeatureMapper {
-  public ZoneTilingTask.Feature toDomain(Feature rest) {
-    return ZoneTilingTask.Feature.builder().id(rest.getId()).build();
+  public Parcel toDomain(Feature rest) {
+    return Parcel.builder().id(rest.getId()).feature(rest).build();
   }
 
   public Feature fromZoneTilingTask(ZoneTilingTask domainTask) {
-    return new Feature().id(domainTask.getFeature().getId());
+    return domainTask.getParcel().getFeature();
   }
 }
