@@ -95,6 +95,8 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
 
     int numberOfZipFiles = 1;
     int numberOfNotDirectoryFilesInZip = 2;
+
+    verify(api, times(1)).downloadTiles(any());
     verify(extensionGuesser, times(numberOfZipFiles + numberOfNotDirectoryFilesInZip)).apply(any());
     verify(bucketComponent, times(numberOfNotDirectoryFilesInZip)).upload(any(), any(String.class));
   }
