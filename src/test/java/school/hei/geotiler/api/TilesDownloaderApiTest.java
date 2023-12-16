@@ -3,6 +3,8 @@ package school.hei.geotiler.api;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.springframework.beans.factory.annotation.Autowired;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,7 +17,7 @@ import school.hei.geotiler.service.api.TilesDownloaderApi;
 import org.junit.jupiter.api.Test;
 
 import static java.util.UUID.randomUUID;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TilesDownloaderApiTest extends FacadeIT {
   @MockBean BucketComponent bucketComponent;
@@ -69,8 +71,8 @@ public class TilesDownloaderApiTest extends FacadeIT {
   }
 
   @Test
+  //@Disabled
   public void download_tiles_ok() throws MalformedURLException, JsonProcessingException {
-
     byte[] result = tilesDownloaderApi.downloadTiles(parcel());
 
     assertTrue(result.length > 0);

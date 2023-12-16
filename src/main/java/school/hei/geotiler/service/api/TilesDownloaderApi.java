@@ -1,153 +1,131 @@
 package school.hei.geotiler.service.api;
 
+import static school.hei.geotiler.model.exception.ApiException.ExceptionType.SERVER_EXCEPTION;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
+import school.hei.geotiler.endpoint.rest.model.GeoServerParameter;
 import school.hei.geotiler.model.exception.ApiException;
 import school.hei.geotiler.repository.model.geo.Parcel;
 
 @Component
+@Slf4j
+@AllArgsConstructor
 public class TilesDownloaderApi {
-  private final String geoTilesDownloaderApiURl = "https://gft64kilv5.execute-api.eu-west-3.amazonaws.com/Prod/";
+    private static final URI geoTilesDownloaderApiURl;
+    private static final int AWS_LAMBDA_SERVER_SUPPORTED_CONCURRENCY_NUMBER = 1;
+    private final ObjectMapper om;
 
-  private final int ZOOM_SIZE = 10;
-
-//    Request body: form-data (server: all parcel server info, geojson: parcel.feature as geojson)
-//    Query param: zoom_size (int)
-
-  public byte[] downloadTiles(Parcel parcel){
-    CloseableHttpClient httpClient = HttpClients.createDefault();
-    HttpPost uploadFile = new HttpPost(geoTilesDownloaderApiURl);
-    MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-
-    builder.setContentType(ContentType.MULTIPART_FORM_DATA);
-
-
-    // This attaches the file to the POST:
-    File server = getServerInfoFile(parcel);
-    File geojson = getGeojson(parcel);
-
-    builder.addBinaryBody(
-        "server",
-        server,
-        ContentType.APPLICATION_JSON,
-        server.getName()
-    );
-    builder.addBinaryBody(
-        "geojson",
-        geojson,
-        ContentType.APPLICATION_JSON,
-        geojson.getName()
-    );
-
-    org.apache.http.HttpEntity multipart = builder.build();
-    uploadFile.setEntity(multipart);
-    byte[] bytes;
-    try {
-      CloseableHttpResponse response = httpClient.execute(uploadFile);
-      org.apache.http.HttpEntity responseEntity = response.getEntity();
-      bytes = responseEntity.getContent().readAllBytes();
-    } catch (IOException e) {
-      throw new ApiException(ApiException.ExceptionType.SERVER_EXCEPTION, e);
+    static {
+        try {
+            geoTilesDownloaderApiURl = new URI("https://gft64kilv5.execute-api.eu-west-3.amazonaws.com/Prod/?zoom_size=1");
+        } catch (URISyntaxException e) {
+            throw new ApiException(SERVER_EXCEPTION, e);
+        }
     }
 
-    return bytes;
-  }
+    @SneakyThrows
+    public byte[] downloadTiles(Parcel parcel) {
+        RestTemplate restTemplate = new RestTemplate();
+        MultipartBodyBuilder multipartBodyBuilder = new MultipartBodyBuilder();
 
-  public File getServerInfoFile(Parcel parcel){
+        multipartBodyBuilder.part("server", getServerInfoFile(parcel));
+        multipartBodyBuilder.part("geojson", getServerInfoFile(parcel));
+        MultiValueMap<String, HttpEntity<?>> multipartBody = multipartBodyBuilder.build();
+        HttpEntity<?> requestEntity
+                = new HttpEntity<>(multipartBody);
 
-    String geoServerUrl = String.valueOf(parcel.getGeoServerUrl());
-    String service = parcel.getGeoServerParameter().getService();
-    String request = parcel.getGeoServerParameter().getRequest();
-    String layers = parcel.getGeoServerParameter().getLayers();
-    String styles = parcel.getGeoServerParameter().getStyles();
-    String format = parcel.getGeoServerParameter().getFormat();
-    String transparent = String.valueOf(parcel.getGeoServerParameter().getTransparent());
-    String version = parcel.getGeoServerParameter().getVersion();
-    String width = String.valueOf(parcel.getGeoServerParameter().getWidth());
-    String height = String.valueOf(parcel.getGeoServerParameter().getHeight());
-    String srs = parcel.getGeoServerParameter().getSrs();
+        ResponseEntity<byte[]> response = restTemplate.postForEntity(geoTilesDownloaderApiURl, requestEntity, byte[].class);
 
-
-    Map<String, Object> serverInfo = new HashMap<>();
-    serverInfo.put("url", geoServerUrl);
-
-    Map<String, Object> serverParameter = new HashMap<>();
-    serverParameter.put("service", service);
-    serverParameter.put("request", request);
-    serverParameter.put("layers", layers);
-    serverParameter.put("styles", styles);
-    serverParameter.put("format", format);
-    serverParameter.put("transparent", transparent);
-    serverParameter.put("version", version);
-    serverParameter.put("width", width);
-    serverParameter.put("height", height);
-    serverParameter.put("srs", srs);
-
-    serverInfo.put("parameter", serverParameter);
-    serverInfo.put("concurrency", 8);
-
-    Path serverInfoPath = Path.of("/tmp/serverInfo.json");
-
-    File file = serverInfoPath.toFile();
-
-    ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      objectMapper.writeValue(file, serverInfo);
-      System.out.println("JSON file created successfully at: " + serverInfoPath);
-    } catch (IOException e) {
-      e.printStackTrace();
+        if (response.getStatusCode().isError()) {
+            throw new ApiException(SERVER_EXCEPTION, "Error on POST : " + geoTilesDownloaderApiURl + " " + response.getStatusCode().getReasonPhrase());
+        }
+        return response.getBody();
     }
-    return file;
-  }
 
-  public File getGeojson(Parcel parcel){
-    Map<String, Object> geometry = new HashMap<>();
-    geometry.put("type", "Polygon");
-    geometry.put("coordinates", parcel.getFeature().getGeometry());
-
-    Map<String, Object> feature = new HashMap<>();
-    feature.put("type", "Feature");
-    feature.put("geometry", geometry);
-
-    List<Object> featuresList = new ArrayList<>();
-    featuresList.add(feature);
-
-    Map<String, Object> featureCollection = new HashMap<>();
-    featureCollection.put("type", "FeatureCollection");
-    featureCollection.put("features", featuresList);
-
-    Path geojsonPath = Path.of("/tmp/file.geojson");
-
-    File file = geojsonPath.toFile();
-    ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      objectMapper.writeValue(file, featureCollection);
-      System.out.println("JSON file created successfully at: " + geojsonPath);
-    } catch (Exception e) {
-      e.printStackTrace();
+    private FileSystemResource getServerInfoFile(Parcel parcel) {
+        String geoServerUrl = String.valueOf(parcel.getGeoServerUrl());
+        var geoServerParameter = parcel.getGeoServerParameter();
+        Map<String, Object> serverInfo = getServerInfo(geoServerUrl, geoServerParameter);
+        Path serverInfoPath = Path.of("/tmp/serverInfo.json");
+        File file = serverInfoPath.toFile();
+        try {
+           om.writeValue(file, serverInfo);
+        } catch (IOException e) {
+            throw new ApiException(SERVER_EXCEPTION, e);
+        }
+        return new FileSystemResource(file);
     }
-    return file;
-  }
+
+    private static Map<String, Object> getServerInfo(
+            String geoServerUrl,
+            GeoServerParameter geoServerParameter) {
+        Map<String, Object> serverParameter = Map.of(
+                "service", geoServerParameter.getService(),
+                "request", geoServerParameter.getRequest(),
+                "layers", geoServerParameter.getStyles(),
+                "styles", geoServerParameter.getStyles(),
+                "format", geoServerParameter.getFormat(),
+                "transparent", geoServerParameter.getTransparent(),
+                "version", geoServerParameter.getVersion(),
+                "width", geoServerParameter.getWidth(),
+                "height", geoServerParameter.getHeight(),
+                "srs", geoServerParameter.getSrs()
+        );
+        Map<String, Object> serverInfo = Map.of(
+                "url", geoServerUrl,
+                "parameter", serverParameter,
+                "concurrency", 1
+        );
+        return serverInfo;
+    }
+
+    private FileSystemResource getGeojson(Parcel parcel) {
+        Map<String, Object> geometry = new HashMap<>();
+        geometry.put("type", "Polygon");
+        geometry.put("coordinates", parcel.getFeature().getGeometry());
+
+        Map<String, Object> feature = new HashMap<>();
+        feature.put("type", "Feature");
+        feature.put("geometry", geometry);
+
+        List<Object> featuresList = new ArrayList<>();
+        featuresList.add(feature);
+
+        Map<String, Object> featureCollection = new HashMap<>();
+        featureCollection.put("type", "FeatureCollection");
+        featureCollection.put("features", featuresList);
+
+        Path geojsonPath = Path.of("/tmp/geojsonPath.geojson");
+
+
+        File geojsonFile = geojsonPath.toFile();
+
+        try {
+            om.writeValue(geojsonFile, featureCollection);
+        } catch (IOException e) {
+            throw new ApiException(SERVER_EXCEPTION, e);
+        }
+
+        return new FileSystemResource(geojsonFile);
+    }
 }
