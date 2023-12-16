@@ -151,6 +151,34 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Feature"
+        zoomLevel:
+          type: string
+          #documented on
+          enum:
+            - WORLD_0
+            - WORLD_1
+            - WORLD_2
+            - CONTINENT_0
+            - CONTINENT_1
+            - COUNTRIES
+            - COUNTRY
+            - STATES
+            - COUNTIES_0
+            - COUNTIES_1
+            - COUNTY
+            - METROPOLITAN_AREA
+            - CITIES
+            - CITY
+            - TOWN
+            - NEIGHBORHOOD
+            - STREETS
+            - CITY_BLOCK
+            - BUILDINGS
+            - BUILDING
+            - HOUSES_0
+            - HOUSES_1
+            - HOUSES_2
+            - HOUSE_PROPERTY
     ZoneTilingJob:
       allOf:
         - $ref: "#/components/schemas/CreateZoneTilingJob"
