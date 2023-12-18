@@ -10,6 +10,7 @@ import static school.hei.geotiler.repository.model.Status.ProgressionStatus.PEND
 
 import java.io.InputStream;
 import java.util.List;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,7 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
   @Autowired ZoneTilingJobRepository zoneTilingJobRepository;
   @MockBean EventProducer eventProducer;
 
+  @SneakyThrows
   @BeforeEach
   void setUp() {
     when(api.downloadTiles(any()))
@@ -54,6 +56,7 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
     when(extensionGuesser.apply(any())).thenCallRealMethod();
   }
 
+  @SneakyThrows
   @Test
   void unzip_and_upload_ok() {
     String jobId = randomUUID().toString();
