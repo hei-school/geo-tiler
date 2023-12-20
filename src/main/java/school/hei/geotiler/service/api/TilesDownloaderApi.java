@@ -26,11 +26,12 @@ import static school.hei.geotiler.model.exception.ApiException.ExceptionType.SER
 @Component
 @Slf4j
 public class TilesDownloaderApi {
+
   @Autowired ObjectMapper om;
 
   private final String geoTilesDownloaderApiURl = "https://gft64kilv5.execute-api.eu-west-3.amazonaws.com/Prod/";
-
-  private final int ZOOM_SIZE = 10;
+  private final String SERVER = "/tmp/serverInfo.json";
+  private final String GEOJSON = "/tmp/geojson.geojson";
 
 //    Request body: form-data (server: all parcel server info, geojson: parcel.feature as geojson)
 //    Query param: zoom_size (int)
@@ -47,7 +48,7 @@ public class TilesDownloaderApi {
     bodies.part("geojson", geojson);
 
     UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(geoTilesDownloaderApiURl)
-        .queryParam("zoom_size", ZOOM_SIZE);
+        .queryParam("zoom_size", parcel.getFeature().getZoom());
 
     MultiValueMap<String, HttpEntity<?>> multipartBody = bodies.build();
 
@@ -90,14 +91,13 @@ public class TilesDownloaderApi {
     serverInfo.put("parameter", serverParameter);
     serverInfo.put("concurrency", 8);
 
-    Path serverInfoPath = Path.of("/tmp/serverInfo.json");
+    Path serverInfoPath = Path.of(SERVER);
 
     File file = serverInfoPath.toFile();
 
     ObjectMapper objectMapper = new ObjectMapper();
     try {
       objectMapper.writeValue(file, serverInfo);
-      System.out.println("JSON file created successfully at: " + serverInfoPath);
     } catch (IOException e) {
       e.printStackTrace();
     }
@@ -117,7 +117,7 @@ public class TilesDownloaderApi {
     featureCollection.put("type", "FeatureCollection");
     featureCollection.put("features", featuresList);
 
-    Path geojsonPath = Path.of("/tmp/geojsonPath.geojson");
+    Path  geojsonPath = Path.of(GEOJSON);
 
     File geojsonFile = geojsonPath.toFile();
     log.info("GEOJSON: {}", om.writeValueAsString(featureCollection));
