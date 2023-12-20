@@ -220,6 +220,8 @@ components:
       properties:
         id:
           type: string
+        zoom:
+          type: integer
         geometry:
           $ref: "#/components/schemas/MultiPolygon"
 
