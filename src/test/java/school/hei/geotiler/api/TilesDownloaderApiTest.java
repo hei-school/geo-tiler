@@ -40,7 +40,7 @@ public class TilesDownloaderApiTest extends FacadeIT {
                 "width": 256,
                 "height": 256,
                 "srs": "EPSG:3857"
-              }""",
+            }""",
                 GeoServerParameter.class))
         .feature(
             om.readValue(

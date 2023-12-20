@@ -60,17 +60,19 @@ public class TilesDownloaderApi {
 
   public File getServerInfoFile(Parcel parcel){
 
+    var geoServerParameter = parcel.getGeoServerParameter();
+
     String geoServerUrl = String.valueOf(parcel.getGeoServerUrl());
-    String service = parcel.getGeoServerParameter().getService();
-    String request = parcel.getGeoServerParameter().getRequest();
-    String layers = parcel.getGeoServerParameter().getLayers();
-    String styles = parcel.getGeoServerParameter().getStyles();
-    String format = parcel.getGeoServerParameter().getFormat();
-    String transparent = String.valueOf(parcel.getGeoServerParameter().getTransparent());
-    String version = parcel.getGeoServerParameter().getVersion();
-    String width = String.valueOf(parcel.getGeoServerParameter().getWidth());
-    String height = String.valueOf(parcel.getGeoServerParameter().getHeight());
-    String srs = parcel.getGeoServerParameter().getSrs();
+    String service = geoServerParameter.getService();
+    String request = geoServerParameter.getRequest();
+    String layers = geoServerParameter.getLayers();
+    String styles = geoServerParameter.getStyles();
+    String format = geoServerParameter.getFormat();
+    String transparent = String.valueOf(geoServerParameter.getTransparent());
+    String version = geoServerParameter.getVersion();
+    String width = String.valueOf(geoServerParameter.getWidth());
+    String height = String.valueOf(geoServerParameter.getHeight());
+    String srs = geoServerParameter.getSrs();
 
 
     Map<String, Object> serverInfo = new HashMap<>();
@@ -89,7 +91,7 @@ public class TilesDownloaderApi {
     serverParameter.put("srs", srs);
 
     serverInfo.put("parameter", serverParameter);
-    serverInfo.put("concurrency", 8);
+    serverInfo.put("concurrency", 1);
 
     Path serverInfoPath = Path.of(SERVER);
 

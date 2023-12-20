@@ -56,7 +56,6 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
     when(extensionGuesser.apply(any())).thenCallRealMethod();
   }
 
-  @SneakyThrows
   @Test
   void unzip_and_upload_ok() {
     String jobId = randomUUID().toString();
