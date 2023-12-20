@@ -6,7 +6,6 @@ import static school.hei.geotiler.repository.model.Status.HealthStatus.FAILED;
 import static school.hei.geotiler.repository.model.Status.HealthStatus.UNKNOWN;
 import static school.hei.geotiler.repository.model.Status.ProgressionStatus.PROCESSING;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -46,12 +45,7 @@ public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCrea
             .taskId(task.getId())
             .build());
     File downloadedTiles =
-        null;
-    try {
-      downloadedTiles = fileWriter.apply(api.downloadTiles(zoneTilingTaskCreated.getTask().getParcel()), null);
-    } catch (JsonProcessingException e) {
-      throw new RuntimeException(e);
-    }
+        fileWriter.apply(api.downloadTiles(zoneTilingTaskCreated.getTask().getParcel()), null);
     try {
       ZipFile asZipFile = new ZipFile(downloadedTiles);
       Path unzippedPath = fileUnzipper.apply(asZipFile);
