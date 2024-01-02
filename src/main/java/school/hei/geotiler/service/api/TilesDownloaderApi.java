@@ -1,5 +1,7 @@
 package school.hei.geotiler.service.api;
 
+import static school.hei.geotiler.model.exception.ApiException.ExceptionType.SERVER_EXCEPTION;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.nio.file.Path;
@@ -17,12 +19,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import school.hei.geotiler.model.exception.ApiException;
 import school.hei.geotiler.repository.model.geo.Parcel;
 
 @Component
 public class TilesDownloaderApi {
   @Autowired ObjectMapper om;
-  private final String geoTilesDownloaderApiURl = "https://gft64kilv5.execute-api.eu-west-3.amazonaws.com/Prod/";
+  private final String geoTilesDownloaderApiURl =
+      "https://gft64kilv5.execute-api.eu-west-3.amazonaws.com/Prod/";
   private final String SERVER = "/tmp/serverInfo.json";
   private final String GEOJSON = "/tmp/geojson.geojson";
 
@@ -33,16 +37,21 @@ public class TilesDownloaderApi {
     bodies.part("geojson", getGeojson(parcel));
     MultiValueMap<String, HttpEntity<?>> multipartBody = bodies.build();
     HttpEntity<MultiValueMap<String, HttpEntity<?>>> request = new HttpEntity<>(multipartBody);
-    UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(geoTilesDownloaderApiURl)
-        .queryParam("zoom_size", parcel.getFeature().getZoom());
+    UriComponentsBuilder builder =
+        UriComponentsBuilder.fromHttpUrl(geoTilesDownloaderApiURl)
+            .queryParam("zoom_size", parcel.getFeature().getZoom());
 
-    ResponseEntity<byte[]> responseEntity = restTemplate.postForEntity(builder.toUriString(), request, byte[].class);
+    ResponseEntity<byte[]> responseEntity =
+        restTemplate.postForEntity(builder.toUriString(), request, byte[].class);
 
-    return responseEntity.getBody();
+    if (responseEntity.getStatusCode().value() == 200) {
+      return responseEntity.getBody();
+    }
+    throw new ApiException(SERVER_EXCEPTION, "Server error");
   }
 
   @SneakyThrows
-  public File getServerInfoFile(Parcel parcel){
+  public File getServerInfoFile(Parcel parcel) {
     var geoServerParameter = parcel.getGeoServerParameter();
     String geoServerUrl = String.valueOf(parcel.getGeoServerUrl());
     String service = geoServerParameter.getService();
@@ -95,7 +104,7 @@ public class TilesDownloaderApi {
     featureCollection.put("type", "FeatureCollection");
     featureCollection.put("features", featuresList);
 
-    Path  geojsonPath = Path.of(GEOJSON);
+    Path geojsonPath = Path.of(GEOJSON);
 
     File geojsonFile = geojsonPath.toFile();
 

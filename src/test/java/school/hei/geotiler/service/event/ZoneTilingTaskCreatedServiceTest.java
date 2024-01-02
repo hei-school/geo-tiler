@@ -39,8 +39,7 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
   @Autowired ZoneTilingTaskRepository repository;
   @Autowired ZoneTilingJobRepository zoneTilingJobRepository;
   @MockBean EventProducer eventProducer;
-  @MockBean
-  Mailer mailer;
+  @MockBean Mailer mailer;
 
   @BeforeEach
   void setUp() {
@@ -103,7 +102,7 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
   }
 
   @Test
-  void send_email_when_tasks_are_finished(){
+  void send_email_when_tasks_are_finished() {
     String jobId = randomUUID().toString();
     ZoneTilingJob job =
         zoneTilingJobRepository.save(
@@ -143,4 +142,5 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
 
     verify(mailer, times(1)).accept(any());
   }
-};
+}
+;

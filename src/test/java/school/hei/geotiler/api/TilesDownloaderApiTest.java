@@ -1,10 +1,14 @@
 package school.hei.geotiler.api;
 
+import static java.util.UUID.randomUUID;
+import static org.junit.Assert.assertTrue;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import school.hei.geotiler.conf.FacadeIT;
 import school.hei.geotiler.endpoint.rest.model.Feature;
@@ -12,10 +16,6 @@ import school.hei.geotiler.endpoint.rest.model.GeoServerParameter;
 import school.hei.geotiler.file.BucketComponent;
 import school.hei.geotiler.repository.model.geo.Parcel;
 import school.hei.geotiler.service.api.TilesDownloaderApi;
-import org.junit.jupiter.api.Test;
-
-import static java.util.UUID.randomUUID;
-import static org.junit.Assert.assertTrue;
 
 public class TilesDownloaderApiTest extends FacadeIT {
   @MockBean BucketComponent bucketComponent;

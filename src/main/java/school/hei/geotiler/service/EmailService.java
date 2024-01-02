@@ -23,7 +23,7 @@ public class EmailService {
   public void sendEmail(ZoneTilingJob zoneTilingJob) {
     Context context = new Context();
     context.setVariable("zone", zoneTilingJob.getZoneName());
-    String emailBody = htmlTemplateParser.apply(ZONE_TILING_TEMPLATE_NAME,context);
+    String emailBody = htmlTemplateParser.apply(ZONE_TILING_TEMPLATE_NAME, context);
 
     mailer.accept(
         new Email(

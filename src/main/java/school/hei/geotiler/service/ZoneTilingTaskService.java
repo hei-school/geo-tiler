@@ -6,7 +6,6 @@ import static school.hei.geotiler.repository.model.Status.HealthStatus.SUCCEEDED
 import static school.hei.geotiler.repository.model.Status.ProgressionStatus.FINISHED;
 
 import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import school.hei.geotiler.model.exception.NotFoundException;
 import school.hei.geotiler.repository.ZoneTilingTaskRepository;
@@ -21,7 +20,6 @@ public class ZoneTilingTaskService {
   private final ZoneTilingJobService zoneTilingJobService;
   private final EmailService emailService;
 
-
   public ZoneTilingTask update(ZoneTilingTask zoneTilingTask) {
     if (!repository.existsById(zoneTilingTask.getId())) {
       throw new NotFoundException("ZoneTilingTask.Id = " + zoneTilingTask.getId() + " not found");
@@ -34,7 +32,6 @@ public class ZoneTilingTaskService {
     return update(zoneTilingTask);
   }
 
-  @SneakyThrows
   public ZoneTilingTask finishWithSuccess(ZoneTilingTask zoneTilingTask) {
     ZoneTilingTask finalized =
         updateStatus(

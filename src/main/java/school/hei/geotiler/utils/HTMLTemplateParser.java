@@ -20,6 +20,7 @@ public class HTMLTemplateParser implements BiFunction<String, Context, String> {
     templateEngine.setTemplateResolver(templateResolver);
     return templateEngine;
   }
+
   @Override
   public String apply(String template, Context context) {
     TemplateEngine engine = configureEngine();
