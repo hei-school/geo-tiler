@@ -21,6 +21,7 @@ import school.hei.geotiler.file.BucketComponent;
 import school.hei.geotiler.file.ExtensionGuesser;
 import school.hei.geotiler.file.FileHash;
 import school.hei.geotiler.file.FileHashAlgorithm;
+import school.hei.geotiler.mail.Mailer;
 import school.hei.geotiler.repository.ZoneTilingJobRepository;
 import school.hei.geotiler.repository.ZoneTilingTaskRepository;
 import school.hei.geotiler.repository.model.JobStatus;
@@ -38,6 +39,7 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
   @Autowired ZoneTilingTaskRepository repository;
   @Autowired ZoneTilingJobRepository zoneTilingJobRepository;
   @MockBean EventProducer eventProducer;
+  @MockBean Mailer mailer;
 
   @BeforeEach
   void setUp() {
@@ -98,4 +100,47 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
     verify(extensionGuesser, times(numberOfZipFiles + numberOfNotDirectoryFilesInZip)).apply(any());
     verify(bucketComponent, times(numberOfNotDirectoryFilesInZip)).upload(any(), any(String.class));
   }
+
+  @Test
+  void send_email_when_tasks_are_finished() {
+    String jobId = randomUUID().toString();
+    ZoneTilingJob job =
+        zoneTilingJobRepository.save(
+            ZoneTilingJob.builder()
+                .id(jobId)
+                .statusHistory(
+                    (List.of(
+                        JobStatus.builder()
+                            .id(randomUUID().toString())
+                            .jobId(jobId)
+                            .progression(PENDING)
+                            .health(UNKNOWN)
+                            .build())))
+                .zoneName("mock")
+                .emailReceiver("mock@hotmail.com")
+                .build());
+    String taskId = randomUUID().toString();
+    ZoneTilingTask toCreate =
+        ZoneTilingTask.builder()
+            .id(taskId)
+            .jobId(job.getId())
+            .parcel(Parcel.builder().id(randomUUID().toString()).build())
+            .statusHistory(
+                List.of(
+                    TaskStatus.builder()
+                        .id(randomUUID().toString())
+                        .taskId(taskId)
+                        .progression(PENDING)
+                        .health(UNKNOWN)
+                        .build()))
+            .build();
+    ZoneTilingTask created = repository.save(toCreate);
+    ZoneTilingTaskCreated createdEventPayload =
+        ZoneTilingTaskCreated.builder().task(created).build();
+
+    subject.accept(createdEventPayload);
+
+    verify(mailer, times(1)).accept(any());
+  }
 }
+;

@@ -18,6 +18,7 @@ import school.hei.geotiler.repository.model.ZoneTilingTask;
 public class ZoneTilingTaskService {
   private final ZoneTilingTaskRepository repository;
   private final ZoneTilingJobService zoneTilingJobService;
+  private final EmailService emailService;
 
   public ZoneTilingTask update(ZoneTilingTask zoneTilingTask) {
     if (!repository.existsById(zoneTilingTask.getId())) {
@@ -45,6 +46,7 @@ public class ZoneTilingTaskService {
     ZoneTilingJob associatedJob = zoneTilingJobService.findById(zoneTilingTask.getJobId());
     if (associatedJob.isDone()) {
       zoneTilingJobService.finishWithSuccess(associatedJob);
+      emailService.sendEmail(associatedJob);
     }
     return finalized;
   }
