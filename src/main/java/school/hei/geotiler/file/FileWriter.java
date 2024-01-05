@@ -30,6 +30,7 @@ public class FileWriter implements BiFunction<byte[], File, File> {
       throw new ApiException(SERVER_EXCEPTION, e);
     }
   }
+
   public File write(byte[] bytes, @Nullable File directory, String fileName) {
     try {
       String suffix = extensionGuesser.apply(bytes);

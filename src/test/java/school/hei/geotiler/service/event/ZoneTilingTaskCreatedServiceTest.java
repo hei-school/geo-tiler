@@ -80,9 +80,11 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
         ZoneTilingTask.builder()
             .id(taskId)
             .jobId(job.getId())
-            .parcel(Parcel.builder()
-                .geoServerParameter(new GeoServerParameter().layers("grand-lyon"))
-                .id(randomUUID().toString()).build())
+            .parcel(
+                Parcel.builder()
+                    .geoServerParameter(new GeoServerParameter().layers("grand-lyon"))
+                    .id(randomUUID().toString())
+                    .build())
             .statusHistory(
                 List.of(
                     TaskStatus.builder()
@@ -127,9 +129,11 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
         ZoneTilingTask.builder()
             .id(taskId)
             .jobId(job.getId())
-            .parcel(Parcel.builder().id(randomUUID().toString())
-                .geoServerParameter(new GeoServerParameter().layers("grand-lyon"))
-                .build())
+            .parcel(
+                Parcel.builder()
+                    .id(randomUUID().toString())
+                    .geoServerParameter(new GeoServerParameter().layers("grand-lyon"))
+                    .build())
             .statusHistory(
                 List.of(
                     TaskStatus.builder()

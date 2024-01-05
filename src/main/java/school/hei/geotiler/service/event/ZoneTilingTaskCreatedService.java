@@ -50,7 +50,8 @@ public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCrea
         fileWriter.apply(api.downloadTiles(zoneTilingTaskCreated.getTask().getParcel()), null);
     try {
       ZipFile asZipFile = new ZipFile(downloadedTiles);
-      String layer = zoneTilingTaskCreated.getTask().getParcel().getGeoServerParameter().getLayers();
+      String layer =
+          zoneTilingTaskCreated.getTask().getParcel().getGeoServerParameter().getLayers();
       Path unzippedPath = fileUnzipper.apply(asZipFile, layer);
       File unzippedPathFile = unzippedPath.toFile();
       File[] directories = unzippedPathFile.listFiles(File::isDirectory);
