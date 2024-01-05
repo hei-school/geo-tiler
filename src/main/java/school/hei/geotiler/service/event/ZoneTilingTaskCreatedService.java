@@ -12,7 +12,6 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 import java.util.zip.ZipFile;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import school.hei.geotiler.endpoint.event.gen.ZoneTilingTaskCreated;
 import school.hei.geotiler.file.BucketComponent;
@@ -26,7 +25,6 @@ import school.hei.geotiler.service.api.TilesDownloaderApi;
 
 @Service
 @AllArgsConstructor
-@Slf4j
 public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCreated> {
   private final TilesDownloaderApi api;
   private final FileWriter fileWriter;
@@ -54,17 +52,7 @@ public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCrea
           zoneTilingTaskCreated.getTask().getParcel().getGeoServerParameter().getLayers();
       Path unzippedPath = fileUnzipper.apply(asZipFile, layer);
       File unzippedPathFile = unzippedPath.toFile();
-      File[] directories = unzippedPathFile.listFiles(File::isDirectory);
-      if (directories != null) {
-        for (File directory : directories) {
-          File[] files = directory.listFiles();
-          if (files != null) {
-            for (File file : files) {
-              bucketComponent.upload(file, file.getName());
-            }
-          }
-        }
-      }
+      bucketComponent.upload(unzippedPathFile, unzippedPathFile.getName());
       zoneTilingTaskService.finishWithSuccess(task);
     } catch (IOException e) {
       zoneTilingTaskService.updateStatus(
