@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class EndpointConf {
   @Bean
-  public ObjectMapper getOm() {
-    return new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false);
+  public ObjectMapper objectMapper() {
+    return new ObjectMapper().configure(FAIL_ON_UNKNOWN_PROPERTIES, false).findAndRegisterModules();
   }
 }
