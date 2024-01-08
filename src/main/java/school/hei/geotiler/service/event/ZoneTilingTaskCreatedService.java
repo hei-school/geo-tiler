@@ -1,7 +1,5 @@
 package school.hei.geotiler.service.event;
 
-import static java.time.Instant.now;
-import static java.util.UUID.randomUUID;
 import static school.hei.geotiler.model.exception.ApiException.ExceptionType.SERVER_EXCEPTION;
 import static school.hei.geotiler.repository.model.Status.HealthStatus.FAILED;
 import static school.hei.geotiler.repository.model.Status.HealthStatus.UNKNOWN;
@@ -20,7 +18,6 @@ import school.hei.geotiler.file.BucketComponent;
 import school.hei.geotiler.file.FileUnzipper;
 import school.hei.geotiler.file.FileWriter;
 import school.hei.geotiler.model.exception.ApiException;
-import school.hei.geotiler.repository.model.TaskStatus;
 import school.hei.geotiler.repository.model.ZoneTilingTask;
 import school.hei.geotiler.service.ZoneTilingTaskService;
 import school.hei.geotiler.service.api.TilesDownloaderApi;
@@ -37,15 +34,7 @@ public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCrea
   @Override
   public void accept(ZoneTilingTaskCreated zoneTilingTaskCreated) {
     ZoneTilingTask task = zoneTilingTaskCreated.getTask();
-    zoneTilingTaskService.updateStatus(
-        task,
-        TaskStatus.builder()
-            .id(randomUUID().toString())
-            .creationDatetime(now())
-            .progression(PROCESSING)
-            .health(UNKNOWN)
-            .taskId(task.getId())
-            .build());
+    zoneTilingTaskService.updateStatus(task, PROCESSING, UNKNOWN);
     File downloadedTiles =
         fileWriter.apply(
             tilesDownloaderApi.downloadTiles(zoneTilingTaskCreated.getTask().getParcel()), null);
@@ -58,15 +47,7 @@ public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCrea
       bucketComponent.upload(unzippedPathFile, unzippedPathFile.getName());
       zoneTilingTaskService.finishWithSuccess(task);
     } catch (IOException e) {
-      zoneTilingTaskService.updateStatus(
-          task,
-          TaskStatus.builder()
-              .id(randomUUID().toString())
-              .creationDatetime(now())
-              .progression(FINISHED) // TODO: test
-              .health(FAILED)
-              .taskId(task.getId())
-              .build());
+      zoneTilingTaskService.updateStatus(task, FINISHED, FAILED);
       throw new ApiException(SERVER_EXCEPTION, e);
     }
   }
