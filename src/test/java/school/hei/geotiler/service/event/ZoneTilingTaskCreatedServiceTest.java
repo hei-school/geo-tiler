@@ -19,7 +19,6 @@ import school.hei.geotiler.endpoint.event.EventProducer;
 import school.hei.geotiler.endpoint.event.gen.ZoneTilingTaskCreated;
 import school.hei.geotiler.endpoint.rest.model.GeoServerParameter;
 import school.hei.geotiler.file.BucketComponent;
-import school.hei.geotiler.file.ExtensionGuesser;
 import school.hei.geotiler.file.FileHash;
 import school.hei.geotiler.file.FileHashAlgorithm;
 import school.hei.geotiler.mail.Mailer;
@@ -36,7 +35,6 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
   @Autowired ZoneTilingTaskCreatedService subject;
   @MockBean BucketComponent bucketComponent;
   @MockBean TilesDownloaderApi api;
-  @MockBean ExtensionGuesser extensionGuesser;
   @Autowired ZoneTilingTaskRepository repository;
   @Autowired ZoneTilingJobRepository zoneTilingJobRepository;
   @MockBean EventProducer eventProducer;
@@ -54,7 +52,6 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
             });
     when(bucketComponent.upload(any(), any()))
         .thenReturn(new FileHash(FileHashAlgorithm.SHA256, "mock"));
-    when(extensionGuesser.apply(any())).thenCallRealMethod();
   }
 
   @Test
@@ -100,10 +97,7 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
 
     subject.accept(createdEventPayload);
 
-    int numberOfZipFiles = 1;
-    int numberOfNotDirectoryFilesInZip = 4;
     int numberOfDirectoryToUpload = 1;
-    verify(extensionGuesser, times(numberOfZipFiles + numberOfNotDirectoryFilesInZip)).apply(any());
     verify(bucketComponent, times(numberOfDirectoryToUpload)).upload(any(), any(String.class));
   }
 
