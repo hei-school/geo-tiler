@@ -86,7 +86,7 @@ public class ZoneTilingJob extends ProgressiveAction<JobStatus> {
     this.tasks = tasks;
   }
 
-  public boolean isDone() {
+  public boolean succeeded() {
     return this.getTasks().stream()
         .allMatch(
             task -> {
