@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import school.hei.geotiler.endpoint.event.EventProducer;
 import school.hei.geotiler.endpoint.event.gen.ZoneTilingJobCreated;
+import school.hei.geotiler.endpoint.event.gen.ZoneTilingJobStatusChanged;
 import school.hei.geotiler.endpoint.event.gen.ZoneTilingTaskCreated;
 import school.hei.geotiler.model.BoundedPageSize;
 import school.hei.geotiler.model.PageFromOne;
@@ -90,16 +91,17 @@ public class ZoneTilingJobService {
   }
 
   public ZoneTilingJob refreshStatus(String jobId) {
-    var job = findById(jobId);
-    Status oldStatus = job.getStatus();
+    var oldJob = findById(jobId);
+    Status oldStatus = oldJob.getStatus();
     Status newStatus =
-        Status.reduce(job.getTasks().stream().map(ZoneTilingTask::getStatus).toList());
+        Status.reduce(oldJob.getTasks().stream().map(ZoneTilingTask::getStatus).toList());
     if (oldStatus.equals(newStatus)) {
-      return job;
+      return oldJob;
     }
 
-    var refreshed = updateStatus(job, newStatus);
-    eventProducer.accept(List.of(/*TODO*/ ));
+    var refreshed = updateStatus(oldJob, newStatus);
+    eventProducer.accept(
+        List.of(ZoneTilingJobStatusChanged.builder().oldJob(oldJob).newJob(refreshed).build()));
     return refreshed;
   }
 }

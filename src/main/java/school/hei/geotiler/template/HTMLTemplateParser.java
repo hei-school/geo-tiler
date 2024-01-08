@@ -1,12 +1,12 @@
 package school.hei.geotiler.template;
 
+import static org.thymeleaf.templatemode.TemplateMode.HTML;
+
 import java.util.function.BiFunction;
 import org.springframework.stereotype.Component;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
-
-import static org.thymeleaf.templatemode.TemplateMode.HTML;
 
 @Component
 public class HTMLTemplateParser implements BiFunction<String, Context, String> {
