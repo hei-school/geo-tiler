@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import school.hei.geotiler.conf.FacadeIT;
 import school.hei.geotiler.endpoint.event.EventProducer;
 import school.hei.geotiler.endpoint.event.gen.ZoneTilingTaskCreated;
+import school.hei.geotiler.endpoint.rest.model.GeoServerParameter;
 import school.hei.geotiler.file.BucketComponent;
 import school.hei.geotiler.file.ExtensionGuesser;
 import school.hei.geotiler.file.FileHash;
@@ -47,7 +48,7 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
         .thenAnswer(
             i -> {
               try (InputStream is =
-                  this.getClass().getClassLoader().getResourceAsStream("mockData/zip.zip"); ) {
+                  this.getClass().getClassLoader().getResourceAsStream("mockData/data.zip"); ) {
                 return is.readAllBytes();
               }
             });
@@ -79,7 +80,11 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
         ZoneTilingTask.builder()
             .id(taskId)
             .jobId(job.getId())
-            .parcel(Parcel.builder().id(randomUUID().toString()).build())
+            .parcel(
+                Parcel.builder()
+                    .geoServerParameter(new GeoServerParameter().layers("grand-lyon"))
+                    .id(randomUUID().toString())
+                    .build())
             .statusHistory(
                 List.of(
                     TaskStatus.builder()
@@ -96,9 +101,10 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
     subject.accept(createdEventPayload);
 
     int numberOfZipFiles = 1;
-    int numberOfNotDirectoryFilesInZip = 2;
+    int numberOfNotDirectoryFilesInZip = 4;
+    int numberOfDirectoryToUpload = 1;
     verify(extensionGuesser, times(numberOfZipFiles + numberOfNotDirectoryFilesInZip)).apply(any());
-    verify(bucketComponent, times(numberOfNotDirectoryFilesInZip)).upload(any(), any(String.class));
+    verify(bucketComponent, times(numberOfDirectoryToUpload)).upload(any(), any(String.class));
   }
 
   @Test
@@ -124,7 +130,11 @@ class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
         ZoneTilingTask.builder()
             .id(taskId)
             .jobId(job.getId())
-            .parcel(Parcel.builder().id(randomUUID().toString()).build())
+            .parcel(
+                Parcel.builder()
+                    .id(randomUUID().toString())
+                    .geoServerParameter(new GeoServerParameter().layers("grand-lyon"))
+                    .build())
             .statusHistory(
                 List.of(
                     TaskStatus.builder()

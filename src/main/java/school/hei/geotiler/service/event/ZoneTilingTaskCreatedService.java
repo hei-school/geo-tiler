@@ -48,16 +48,11 @@ public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCrea
         fileWriter.apply(api.downloadTiles(zoneTilingTaskCreated.getTask().getParcel()), null);
     try {
       ZipFile asZipFile = new ZipFile(downloadedTiles);
-      Path unzippedPath = fileUnzipper.apply(asZipFile);
+      String layer =
+          zoneTilingTaskCreated.getTask().getParcel().getGeoServerParameter().getLayers();
+      Path unzippedPath = fileUnzipper.apply(asZipFile, layer);
       File unzippedPathFile = unzippedPath.toFile();
-      File[] files = unzippedPathFile.listFiles();
-      if (files != null) {
-        for (File file : files) {
-          if (!file.isDirectory()) {
-            bucketComponent.upload(file, file.getName());
-          }
-        }
-      }
+      bucketComponent.upload(unzippedPathFile, unzippedPathFile.getName());
       zoneTilingTaskService.finishWithSuccess(task);
     } catch (IOException e) {
       zoneTilingTaskService.updateStatus(

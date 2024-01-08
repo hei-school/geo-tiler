@@ -28,4 +28,15 @@ public class FileWriter implements BiFunction<byte[], File, File> {
       throw new ApiException(SERVER_EXCEPTION, e);
     }
   }
+
+  public File write(byte[] bytes, @Nullable File directory, String filename) {
+    try {
+      String suffix = extensionGuesser.apply(bytes);
+      File newFile = new File(directory, filename + suffix);
+      Files.createDirectories(newFile.toPath().getParent());
+      return Files.write(newFile.toPath(), bytes).toFile();
+    } catch (IOException e) {
+      throw new ApiException(SERVER_EXCEPTION, e);
+    }
+  }
 }
