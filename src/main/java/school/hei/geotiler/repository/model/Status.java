@@ -4,6 +4,7 @@ import static javax.persistence.GenerationType.IDENTITY;
 import static school.hei.geotiler.repository.model.types.PostgresEnumType.PGSQL_ENUM_NAME;
 
 import java.time.Instant;
+import java.util.List;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -41,6 +42,10 @@ public class Status {
 
   @CreationTimestamp private Instant creationDatetime;
   private String message;
+
+  public static Status reduce(List<TaskStatus> statuses) {
+    return null; // TODO
+  }
 
   public enum ProgressionStatus {
     PENDING,
