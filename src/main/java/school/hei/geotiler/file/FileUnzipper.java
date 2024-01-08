@@ -46,18 +46,17 @@ public class FileUnzipper implements BiFunction<ZipFile, String, Path> {
     }
   }
 
-  public String getFolderPath(ZipEntry zipEntry){
+  public String getFolderPath(ZipEntry zipEntry) {
     String entryPath = zipEntry.getName();
     return entryPath.substring(0, entryPath.lastIndexOf("/"));
   }
 
-  public String getFilename(ZipEntry zipEntry){
+  public String getFilename(ZipEntry zipEntry) {
     String entryPath = zipEntry.getName();
     return Paths.get(entryPath).getFileName().toString();
   }
 
-  public String stripExtension(String filename){
+  public String stripExtension(String filename) {
     return filename.substring(0, filename.lastIndexOf("."));
   }
-
 }
