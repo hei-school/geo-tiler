@@ -17,7 +17,7 @@ import school.hei.geotiler.file.BucketComponent;
 import school.hei.geotiler.repository.model.geo.Parcel;
 import school.hei.geotiler.service.api.TilesDownloaderApi;
 
-public class TilesDownloaderApiTest extends FacadeIT {
+public class TilesDownloaderApiIT extends FacadeIT {
   @MockBean BucketComponent bucketComponent;
   @Autowired TilesDownloaderApi tilesDownloaderApi;
   @Autowired ObjectMapper om;

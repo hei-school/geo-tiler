@@ -31,7 +31,7 @@ import school.hei.geotiler.repository.model.ZoneTilingTask;
 import school.hei.geotiler.repository.model.geo.Parcel;
 import school.hei.geotiler.service.api.TilesDownloaderApi;
 
-class ZoneTilingTaskCreatedServiceTest extends FacadeIT {
+class ZoneTilingTaskCreatedServiceIT extends FacadeIT {
   @Autowired ZoneTilingTaskCreatedService subject;
   @MockBean BucketComponent bucketComponent;
   @MockBean TilesDownloaderApi api;

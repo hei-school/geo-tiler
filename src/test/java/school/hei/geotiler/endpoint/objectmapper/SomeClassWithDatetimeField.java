@@ -1,4 +1,4 @@
-package school.hei.geotiler.unit.objectMapper;
+package school.hei.geotiler.endpoint.objectmapper;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.Instant;

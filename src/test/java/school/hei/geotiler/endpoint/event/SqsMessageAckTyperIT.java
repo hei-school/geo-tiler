@@ -1,4 +1,4 @@
-package school.hei.geotiler.unit;
+package school.hei.geotiler.endpoint.event;
 
 import static java.util.UUID.randomUUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -15,12 +15,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import school.hei.geotiler.conf.FacadeIT;
-import school.hei.geotiler.endpoint.event.EventConsumer;
 import school.hei.geotiler.endpoint.event.gen.UuidCreated;
 import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 
-public class SqsMessageAckTyperTest extends FacadeIT {
+public class SqsMessageAckTyperIT extends FacadeIT {
   public static final String UNKNOWN_TYPENAME = "unknown_typename";
   @Autowired EventConsumer.SqsMessageAckTyper subject;
   @Autowired ObjectMapper om;

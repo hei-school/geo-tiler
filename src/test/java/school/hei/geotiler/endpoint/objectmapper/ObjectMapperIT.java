@@ -1,4 +1,4 @@
-package school.hei.geotiler.unit.objectMapper;
+package school.hei.geotiler.endpoint.objectmapper;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import school.hei.geotiler.conf.FacadeIT;
 
-public class ObjectMapperTest extends FacadeIT {
+public class ObjectMapperIT extends FacadeIT {
   @Autowired ObjectMapper injectedBean;
   ObjectMapper newInstance = new ObjectMapper();
 
