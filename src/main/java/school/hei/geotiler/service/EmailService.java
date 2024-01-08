@@ -9,7 +9,7 @@ import org.thymeleaf.context.Context;
 import school.hei.geotiler.mail.Email;
 import school.hei.geotiler.mail.Mailer;
 import school.hei.geotiler.repository.model.ZoneTilingJob;
-import school.hei.geotiler.utils.HTMLTemplateParser;
+import school.hei.geotiler.template.HTMLTemplateParser;
 
 @Service
 @AllArgsConstructor
