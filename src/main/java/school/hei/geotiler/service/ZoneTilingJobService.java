@@ -94,7 +94,11 @@ public class ZoneTilingJobService {
     var oldJob = findById(jobId);
     Status oldStatus = oldJob.getStatus();
     Status newStatus =
-        Status.reduce(oldJob.getTasks().stream().map(ZoneTilingTask::getStatus).toList());
+        Status.reduce(
+            oldJob.getTasks().stream()
+                .map(ZoneTilingTask::getStatus)
+                .map(status -> (Status) status)
+                .toList());
     if (oldStatus.equals(newStatus)) {
       return oldJob;
     }
