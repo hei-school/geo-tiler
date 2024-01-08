@@ -2,10 +2,9 @@ package school.hei.geotiler.service;
 
 import static java.time.Instant.now;
 import static java.util.UUID.randomUUID;
-import static school.hei.geotiler.repository.model.Status.HealthStatus.SUCCEEDED;
 import static school.hei.geotiler.repository.model.Status.HealthStatus.UNKNOWN;
-import static school.hei.geotiler.repository.model.Status.ProgressionStatus.FINISHED;
 import static school.hei.geotiler.repository.model.Status.ProgressionStatus.PENDING;
+import static school.hei.geotiler.repository.model.Status.ProgressionStatus.PROCESSING;
 
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -14,13 +13,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import school.hei.geotiler.endpoint.event.EventProducer;
 import school.hei.geotiler.endpoint.event.gen.ZoneTilingJobCreated;
+import school.hei.geotiler.endpoint.event.gen.ZoneTilingTaskCreated;
 import school.hei.geotiler.model.BoundedPageSize;
 import school.hei.geotiler.model.PageFromOne;
 import school.hei.geotiler.model.exception.NotFoundException;
 import school.hei.geotiler.repository.ZoneTilingJobRepository;
 import school.hei.geotiler.repository.model.JobStatus;
+import school.hei.geotiler.repository.model.Status;
+import school.hei.geotiler.repository.model.Status.HealthStatus;
+import school.hei.geotiler.repository.model.Status.ProgressionStatus;
 import school.hei.geotiler.repository.model.TaskStatus;
 import school.hei.geotiler.repository.model.ZoneTilingJob;
+import school.hei.geotiler.repository.model.ZoneTilingTask;
 
 @Service
 @AllArgsConstructor
@@ -32,7 +36,7 @@ public class ZoneTilingJobService {
     eventProducer.accept(List.of(new ZoneTilingJobCreated(job)));
   }
 
-  public ZoneTilingJob createJob(ZoneTilingJob job) {
+  public ZoneTilingJob create(ZoneTilingJob job) {
     boolean areAllTasksPending =
         !job.getTasks().stream()
             .allMatch(
@@ -55,33 +59,47 @@ public class ZoneTilingJobService {
     return repository.findAll(pageable).toList();
   }
 
-  public ZoneTilingJob update(ZoneTilingJob zoneTilingJob) {
-    if (!repository.existsById(zoneTilingJob.getId())) {
-      throw new NotFoundException("ZoneTilingJob.Id = " + zoneTilingJob + " not found.");
-    }
-    return repository.save(zoneTilingJob);
-  }
-
-  public ZoneTilingJob updateStatus(ZoneTilingJob zoneTilingJob, JobStatus status) {
-    zoneTilingJob.addStatus(status);
-    return update(zoneTilingJob);
-  }
-
   public ZoneTilingJob findById(String id) {
     return repository
         .findById(id)
         .orElseThrow(() -> new NotFoundException("ZoneTilingJob.Id " + id + " not found"));
   }
 
-  public ZoneTilingJob finishWithSuccess(ZoneTilingJob zoneTilingJob) {
-    return updateStatus(
-        zoneTilingJob,
+  public ZoneTilingJob process(ZoneTilingJob job) {
+    var processed = updateStatus(job, PROCESSING, UNKNOWN);
+    job.getTasks().forEach(task -> eventProducer.accept(List.of(new ZoneTilingTaskCreated(task))));
+    return processed;
+  }
+
+  private ZoneTilingJob updateStatus(
+      ZoneTilingJob job, ProgressionStatus progression, HealthStatus health) {
+    job.addStatus(
         JobStatus.builder()
             .id(randomUUID().toString())
-            .jobId(zoneTilingJob.getId())
-            .progression(FINISHED)
-            .health(SUCCEEDED)
+            .jobId(job.getId())
+            .progression(progression)
+            .health(health)
             .creationDatetime(now())
             .build());
+    return repository.save(job);
+  }
+
+  private ZoneTilingJob updateStatus(ZoneTilingJob job, Status status) {
+    job.addStatus(JobStatus.from(randomUUID().toString(), status));
+    return repository.save(job);
+  }
+
+  public ZoneTilingJob refreshStatus(String jobId) {
+    var job = findById(jobId);
+    Status oldStatus = job.getStatus();
+    Status newStatus =
+        Status.reduce(job.getTasks().stream().map(ZoneTilingTask::getStatus).toList());
+    if (oldStatus.equals(newStatus)) {
+      return job;
+    }
+
+    var refreshed = updateStatus(job, newStatus);
+    eventProducer.accept(List.of(/*TODO*/ ));
+    return refreshed;
   }
 }

@@ -24,7 +24,7 @@ public class ZoneTilingController {
 
   @PostMapping("/tilingJobs")
   public ZoneTilingJob tileZone(@RequestBody CreateZoneTilingJob job) {
-    return mapper.toRest(service.createJob(mapper.toDomain(job)));
+    return mapper.toRest(service.create(mapper.toDomain(job)));
   }
 
   @GetMapping("/tilingJobs")

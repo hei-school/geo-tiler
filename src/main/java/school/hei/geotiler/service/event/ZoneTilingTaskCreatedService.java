@@ -1,10 +1,6 @@
 package school.hei.geotiler.service.event;
 
 import static school.hei.geotiler.model.exception.ApiException.ExceptionType.SERVER_EXCEPTION;
-import static school.hei.geotiler.repository.model.Status.HealthStatus.FAILED;
-import static school.hei.geotiler.repository.model.Status.HealthStatus.UNKNOWN;
-import static school.hei.geotiler.repository.model.Status.ProgressionStatus.FINISHED;
-import static school.hei.geotiler.repository.model.Status.ProgressionStatus.PROCESSING;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +15,7 @@ import school.hei.geotiler.file.FileUnzipper;
 import school.hei.geotiler.file.FileWriter;
 import school.hei.geotiler.model.exception.ApiException;
 import school.hei.geotiler.repository.model.ZoneTilingTask;
-import school.hei.geotiler.service.ZoneTilingTaskService;
+import school.hei.geotiler.service.ZoneTilingTaskStatusService;
 import school.hei.geotiler.service.api.TilesDownloaderApi;
 
 @Service
@@ -29,12 +25,12 @@ public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCrea
   private final FileWriter fileWriter;
   private final FileUnzipper fileUnzipper;
   private final BucketComponent bucketComponent;
-  private final ZoneTilingTaskService zoneTilingTaskService;
+  private final ZoneTilingTaskStatusService zoneTilingTaskStatusService;
 
   @Override
   public void accept(ZoneTilingTaskCreated zoneTilingTaskCreated) {
     ZoneTilingTask task = zoneTilingTaskCreated.getTask();
-    zoneTilingTaskService.updateStatus(task, PROCESSING, UNKNOWN);
+    zoneTilingTaskStatusService.process(task);
     File downloadedTiles =
         fileWriter.apply(
             tilesDownloaderApi.downloadTiles(zoneTilingTaskCreated.getTask().getParcel()), null);
@@ -45,9 +41,9 @@ public class ZoneTilingTaskCreatedService implements Consumer<ZoneTilingTaskCrea
       Path unzippedPath = fileUnzipper.apply(asZipFile, layer);
       File unzippedPathFile = unzippedPath.toFile();
       bucketComponent.upload(unzippedPathFile, unzippedPathFile.getName());
-      zoneTilingTaskService.finishWithSuccess(task);
+      zoneTilingTaskStatusService.succeed(task);
     } catch (IOException e) {
-      zoneTilingTaskService.updateStatus(task, FINISHED, FAILED);
+      zoneTilingTaskStatusService.fail(task);
       throw new ApiException(SERVER_EXCEPTION, e);
     }
   }
