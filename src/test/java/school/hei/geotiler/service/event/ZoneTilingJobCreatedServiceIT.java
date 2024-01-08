@@ -25,7 +25,7 @@ import school.hei.geotiler.repository.model.ZoneTilingTask;
 import school.hei.geotiler.repository.model.geo.Parcel;
 import school.hei.geotiler.service.ZoneTilingJobService;
 
-class ZoneTilingJobCreatedServiceTest extends FacadeIT {
+class ZoneTilingJobCreatedServiceIT extends FacadeIT {
   @Autowired ZoneTilingJobCreatedService subject;
   @Autowired ZoneTilingJobService zoneTilingJobService;
   @MockBean EventProducer eventProducer;
