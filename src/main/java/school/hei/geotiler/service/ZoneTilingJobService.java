@@ -32,10 +32,6 @@ public class ZoneTilingJobService {
   private final EventProducer eventProducer;
   private final ZoneTilingJobRepository repository;
 
-  private void fireEvents(ZoneTilingJob job) {
-    eventProducer.accept(List.of(new ZoneTilingJobCreated(job)));
-  }
-
   public ZoneTilingJob create(ZoneTilingJob job) {
     if (!areAllTasksPending(job)) {
       throw new IllegalArgumentException(
@@ -43,7 +39,7 @@ public class ZoneTilingJobService {
     }
 
     var saved = repository.save(job);
-    fireEvents(saved);
+    eventProducer.accept(List.of(new ZoneTilingJobCreated(job)));
     return saved;
   }
 
