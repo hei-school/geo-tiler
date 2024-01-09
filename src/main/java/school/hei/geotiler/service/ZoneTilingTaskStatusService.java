@@ -15,6 +15,7 @@ import school.hei.geotiler.repository.ZoneTilingTaskRepository;
 import school.hei.geotiler.repository.model.Status.HealthStatus;
 import school.hei.geotiler.repository.model.Status.ProgressionStatus;
 import school.hei.geotiler.repository.model.TaskStatus;
+import school.hei.geotiler.repository.model.ZoneTilingJob;
 import school.hei.geotiler.repository.model.ZoneTilingTask;
 
 @Service
@@ -22,6 +23,7 @@ import school.hei.geotiler.repository.model.ZoneTilingTask;
 public class ZoneTilingTaskStatusService {
   private final ZoneTilingTaskRepository repository;
   private final ZoneTilingJobService zoneTilingJobService;
+  private final EmailService emailService;
 
   public ZoneTilingTask process(ZoneTilingTask task) {
     return updateStatus(task, PROCESSING, UNKNOWN);
@@ -54,7 +56,14 @@ public class ZoneTilingTaskStatusService {
     }
 
     var updated = repository.save(zoneTilingTask);
-    zoneTilingJobService.refreshStatus(zoneTilingTask.getJobId());
+
+    ZoneTilingJob jobRefreshedStatus = zoneTilingJobService.refreshStatus(zoneTilingTask.getJobId());
+
+    if(jobRefreshedStatus.getStatus().getProgression() ==  FINISHED &&
+        jobRefreshedStatus.getStatus().getHealth() == SUCCEEDED){
+      emailService.sendEmail(zoneTilingJobService.findById(zoneTilingTask.getJobId()));
+    }
+
     return updated;
   }
 }
