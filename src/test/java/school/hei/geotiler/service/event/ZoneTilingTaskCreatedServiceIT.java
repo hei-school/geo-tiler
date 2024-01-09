@@ -156,5 +156,6 @@ class ZoneTilingTaskCreatedServiceIT extends FacadeIT {
     assertEquals(PROCESSING, changedToProcessing.getNewJob().getStatus().getProgression());
     var changedToFinished = (ZoneTilingJobStatusChanged) sentEvents.get(1);
     assertEquals(FINISHED, changedToFinished.getNewJob().getStatus().getProgression());
+    verify(mailer, times(1)).accept(any());
   }
 }
