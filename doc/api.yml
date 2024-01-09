@@ -21,6 +21,8 @@ paths:
                 example: pong
   '/tilingJobs':
     post:
+      tags:
+        - Tiling
       operationId: tileZone
       description: creates a zone tiling job
       requestBody:
@@ -38,6 +40,8 @@ paths:
         '500':
           $ref: '#/components/responses/500'
     get:
+      tags:
+        - Tiling
       operationId: getTilingJobs
       description: gets a list of all tiling job
       parameters:
@@ -248,27 +252,27 @@ components:
     Point:
       type: object
       allOf:
-        - $ref: "#/definitions/Geometry"
+        - $ref: "#/components/schemas/Geometry"
       properties:
         coordinates:
-          $ref: '#/definitions/Point2D'
+          $ref: '#/components/schemas/Point2D'
 
     Polygon:
       type: object
       allOf:
-        - $ref: "#/definitions/Geometry"
+        - $ref: "#/components/schemas/Geometry"
       properties:
         coordinates:
           type: array
           items:
             type: array
             items:
-              $ref: '#/definitions/Point2D'
+              $ref: '#/components/schemas/Point2D'
 
     MultiPolygon:
       type: object
       allOf:
-        - $ref: "#/definitions/Geometry"
+        - $ref: "#/components/schemas/Geometry"
       properties:
         coordinates:
           type: array
@@ -277,4 +281,4 @@ components:
             items:
               type: array
               items:
-                $ref: '#/definitions/Point2D'
+                $ref: '#/components/schemas/Point2D'
