@@ -34,8 +34,7 @@ public class ZoneTilingJobService {
 
   public ZoneTilingJob create(ZoneTilingJob job) {
     if (!areAllTasksPending(job)) {
-      throw new IllegalArgumentException(
-          "Tasks on job creation must all have status PENDING");
+      throw new IllegalArgumentException("Tasks on job creation must all have status PENDING");
     }
 
     var saved = repository.save(job);
@@ -80,7 +79,7 @@ public class ZoneTilingJobService {
   }
 
   private ZoneTilingJob updateStatus(ZoneTilingJob job, Status status) {
-    job.addStatus(JobStatus.from(randomUUID().toString(), status));
+    job.addStatus(JobStatus.from(job.getId(), status));
     return repository.save(job);
   }
 
