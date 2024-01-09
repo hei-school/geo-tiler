@@ -38,8 +38,8 @@ public class ZoneTilingJobService {
 
   public ZoneTilingJob create(ZoneTilingJob job) {
     if (!areAllTasksPending(job)) {
-      throw new RuntimeException(
-          "Bad Request Exception: tasks on job creation must all have status PENDING UNKNOWN");
+      throw new IllegalArgumentException(
+          "Tasks on job creation must all have status PENDING");
     }
 
     var saved = repository.save(job);
