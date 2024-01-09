@@ -1,26 +1,31 @@
 package school.hei.geotiler.service.event;
 
 import static java.util.UUID.randomUUID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static school.hei.geotiler.file.FileHashAlgorithm.SHA256;
 import static school.hei.geotiler.repository.model.Status.HealthStatus.UNKNOWN;
+import static school.hei.geotiler.repository.model.Status.ProgressionStatus.FINISHED;
 import static school.hei.geotiler.repository.model.Status.ProgressionStatus.PENDING;
+import static school.hei.geotiler.repository.model.Status.ProgressionStatus.PROCESSING;
 
 import java.io.InputStream;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import school.hei.geotiler.conf.FacadeIT;
 import school.hei.geotiler.endpoint.event.EventProducer;
+import school.hei.geotiler.endpoint.event.gen.ZoneTilingJobStatusChanged;
 import school.hei.geotiler.endpoint.event.gen.ZoneTilingTaskCreated;
 import school.hei.geotiler.endpoint.rest.model.GeoServerParameter;
 import school.hei.geotiler.file.BucketComponent;
 import school.hei.geotiler.file.FileHash;
-import school.hei.geotiler.file.FileHashAlgorithm;
 import school.hei.geotiler.mail.Mailer;
 import school.hei.geotiler.repository.ZoneTilingJobRepository;
 import school.hei.geotiler.repository.ZoneTilingTaskRepository;
@@ -50,8 +55,7 @@ class ZoneTilingTaskCreatedServiceIT extends FacadeIT {
                 return is.readAllBytes();
               }
             });
-    when(bucketComponent.upload(any(), any()))
-        .thenReturn(new FileHash(FileHashAlgorithm.SHA256, "mock"));
+    when(bucketComponent.upload(any(), any())).thenReturn(new FileHash(SHA256, "mock"));
   }
 
   @Test
@@ -102,7 +106,7 @@ class ZoneTilingTaskCreatedServiceIT extends FacadeIT {
   }
 
   @Test
-  void send_email_when_tasks_are_finished() {
+  void send_statusChanged_event_on_each_status_change() {
     String jobId = randomUUID().toString();
     ZoneTilingJob job =
         zoneTilingJobRepository.save(
@@ -144,7 +148,13 @@ class ZoneTilingTaskCreatedServiceIT extends FacadeIT {
 
     subject.accept(createdEventPayload);
 
-    verify(mailer, times(1)).accept(any());
+    var eventCaptor = ArgumentCaptor.forClass(List.class);
+    verify(eventProducer, times(2)).accept(eventCaptor.capture());
+    var sentEvents = eventCaptor.getAllValues().stream().flatMap(List::stream).toList();
+    assertEquals(2, sentEvents.size());
+    var changedToProcessing = (ZoneTilingJobStatusChanged) sentEvents.get(0);
+    assertEquals(PROCESSING, changedToProcessing.getNewJob().getStatus().getProgression());
+    var changedToFinished = (ZoneTilingJobStatusChanged) sentEvents.get(1);
+    assertEquals(FINISHED, changedToFinished.getNewJob().getStatus().getProgression());
   }
 }
-;
