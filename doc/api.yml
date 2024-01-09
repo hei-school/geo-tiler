@@ -1,10 +1,14 @@
 openapi: 3.0.3
+
 info:
-  title: geo-tiler
-  description: geo-tiler
+  title: geo-jobs
+  description: Launch Zone Tiling Jobs (ZTJ) and Zone Detection Jobs (ZDJ).
   version: 'latest'
+
 servers:
   - url: 'https://localhost:8080'
+
+
 paths:
   '/ping':
     get:
@@ -24,7 +28,7 @@ paths:
       tags:
         - Tiling
       operationId: tileZone
-      description: creates a zone tiling job
+      description: Creates a ZTJ
       requestBody:
         content:
           application/json:
@@ -32,7 +36,7 @@ paths:
               $ref: "#/components/schemas/CreateZoneTilingJob"
       responses:
         200:
-          description: the created zone tiling job
+          description: The created ZTJ
           content:
             application/json:
               schema:
@@ -43,7 +47,7 @@ paths:
       tags:
         - Tiling
       operationId: getTilingJobs
-      description: gets a list of all tiling job
+      description: List all ZTJ
       parameters:
         - in: query
           name: page
@@ -55,7 +59,7 @@ paths:
             $ref: "#/components/schemas/PageSize"
       responses:
         200:
-          description: all present jobs
+          description: All ZTJ
           content:
             application/json:
               schema:
@@ -64,6 +68,113 @@ paths:
                   $ref: "#/components/schemas/ZoneTilingJob"
         '500':
           $ref: '#/components/responses/500'
+  '/tilingJobs/{id}/parcels':
+    get:
+      tags:
+        - Tiling
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ZTJ identifier
+          schema:
+            type: string
+      operationId: getZTJParcels
+      description: List all parcels from a ZTJ
+      responses:
+        200:
+          description: All parcels for given ZTJ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Parcel"
+        '500':
+          $ref: '#/components/responses/500'
+
+  '/detectionJobs':
+    get:
+      tags:
+        - Detection
+      operationId: getDetectionJobs
+      description: List all ZDJ
+      parameters:
+        - in: query
+          name: page
+          schema:
+            $ref: "#/components/schemas/Page"
+        - in: query
+          name: pageSize
+          schema:
+            $ref: "#/components/schemas/PageSize"
+      responses:
+        200:
+          description: All ZDJ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ZoneDetectionJob"
+        '500':
+          $ref: '#/components/responses/500'
+  '/detectionJobs/{id}/detectedParcels':
+    get:
+      tags:
+        - Detection
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ZDJ identifier
+          schema:
+            type: string
+      operationId: getZDJParcels
+      description: List all detected parcels from a ZTJ
+      responses:
+        200:
+          description: All detected parcels for given ZTJ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/DetectedParcel"
+        '500':
+          $ref: '#/components/responses/500'
+  '/detectionJobs/{id}/process':
+    post:
+      tags:
+        - Detection
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ZDJ identifier
+          schema:
+            type: string
+      operationId: processZDJ
+      description: Process a ZDJ
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/DetectableObjectType"
+      responses:
+        200:
+          description: The processed (-ing) ZDJ
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ZoneDetectionJob"
+        '500':
+          $ref: '#/components/responses/500'
+
 components:
   responses:
     400:
@@ -157,7 +268,6 @@ components:
             $ref: "#/components/schemas/Feature"
         zoomLevel:
           type: string
-          #documented on
           enum:
             - WORLD_0
             - WORLD_1
@@ -189,7 +299,138 @@ components:
       properties:
         id:
           type: string
+        creationDatetime:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/Status"
 
+    CreateZoneDetectionJob:
+      type: object
+      properties:
+        emailReceiver:
+          type: string
+        zoneName:
+          type: string
+        zoneTilingJobId:
+          type: string
+        objectTypesToDetect:
+          type: array
+          items:
+           $ref: "#/components/schemas/DetectableObjectType"
+    ZoneDetectionJob:
+      allOf:
+        - $ref: "#/components/schemas/CreateZoneDetectionJob"
+      properties:
+        id:
+          type: string
+        creationDatetime:
+          type: string
+          format: date-time
+        status:
+          $ref: "#/components/schemas/Status"
+    DetectableObjectType:
+      type: string
+      enum:
+        - ROOF
+        - SOLAR_PANEL
+        - POOL
+        - PATHWAY
+        - TREE
+
+    Parcel:
+      properties:
+        id:
+          type: string
+        creationDatetime:
+          type: string
+          format: date-time
+        feature:
+          $ref: "#/components/schemas/Feature"
+        tiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/Tile"
+        tilingStatus:
+          $ref: "#/components/schemas/Status"
+    DetectedParcel:
+      properties:
+        id:
+          type: string
+        detectionJobIb:
+          type: string
+        parcelId:
+          type: string
+        creationDatetime:
+          type: string
+          format: date-time
+        detectedTiles:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetectedTile"
+        status:
+          $ref: "#/components/schemas/Status"
+
+    Tile:
+      properties:
+        id:
+          type: string
+        creationDatetime:
+          type: string
+          format: date-time
+        coordinates:
+          type: object
+          properties:
+            x:
+              type: integer
+            y:
+              type: integer
+            z:
+              type: integer
+        bucketPath:
+          type: string
+    DetectedTile:
+      properties:
+        tileId:
+          type: string
+        creationDatetime:
+          type: string
+          format: date-time
+        detectedObjects:
+          type: array
+          items:
+              $ref: "#/components/schemas/DetectedObject"
+        status:
+          $ref: "#/components/schemas/Status"
+        bucketPath:
+          type: string
+    DetectedObject:
+      properties:
+          detectedObjectType:
+            $ref: "#/components/schemas/DetectableObjectType"
+          feature:
+            $ref: "#/components/schemas/Feature"
+          confidence:
+            type: number
+
+    Status:
+      type: object
+      properties:
+        progression:
+          type: string
+          enum:
+            - PENDING
+            - PROCESSING
+            - FINISHED
+        health:
+          type: string
+          enum:
+            - SUCCEEDED
+            - FAILED
+            - UNKNOWN
+        creationDatetime:
+          type: string
+          format: date-time
 
     ###########################################################################################################
     ###  GeoJSON objects. Modified from: https://gist.github.com/bubbobne/fe5f2db65acf039be6a9fd92fc9c7233  ###
