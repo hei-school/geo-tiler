@@ -23,7 +23,6 @@ import school.hei.geotiler.repository.model.JobStatus;
 import school.hei.geotiler.repository.model.Status;
 import school.hei.geotiler.repository.model.Status.HealthStatus;
 import school.hei.geotiler.repository.model.Status.ProgressionStatus;
-import school.hei.geotiler.repository.model.TaskStatus;
 import school.hei.geotiler.repository.model.ZoneTilingJob;
 import school.hei.geotiler.repository.model.ZoneTilingTask;
 
@@ -38,21 +37,20 @@ public class ZoneTilingJobService {
   }
 
   public ZoneTilingJob create(ZoneTilingJob job) {
-    boolean areAllTasksPending =
-        !job.getTasks().stream()
-            .allMatch(
-                task -> {
-                  TaskStatus status = task.getStatus();
-                  return UNKNOWN.equals(status.getHealth())
-                      && PENDING.equals(status.getProgression());
-                });
-    if (areAllTasksPending) {
+    if (!areAllTasksPending(job)) {
       throw new RuntimeException(
           "Bad Request Exception: tasks on job creation must all have status PENDING UNKNOWN");
     }
+
     var saved = repository.save(job);
     fireEvents(saved);
     return saved;
+  }
+
+  private static boolean areAllTasksPending(ZoneTilingJob job) {
+    return job.getTasks().stream()
+        .map(ZoneTilingTask::getStatus)
+        .allMatch(status -> PENDING.equals(status.getProgression()));
   }
 
   public List<ZoneTilingJob> findAll(PageFromOne page, BoundedPageSize pageSize) {
